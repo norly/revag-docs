@@ -1,0 +1,120 @@
+Header
+=======
+
+Header syntax
+--------------
+
+Two bytes:
+1 bit: Multiframe escape
+3 bits: Opcode
+6 bits: Node/Lsg
+6 bits: Port/Function/Register
+
+
+Multiframe escape
+------------------
+
+If the very first bit is set, then this is not a BAP header,
+but rather a header for a multiframe BAP message. See below.
+
+
+OpCodes
+--------
+
+0 First message on boot
+1 Request current value
+  (like HTTP GET)
+  (used to download MDI's initial state on Radio boot)
+  (used for listing MDI's current directory)
+2 Set value and/or perform action
+  (like HTTP PUT)
+3 Heartbeat:
+  Re-broadcast of current value while idle
+  (1 function/register per second)
+4 Answer to Opcode 1 (value just requested), or
+  Gratuitous update (value just changed)
+5 --never seen--
+6 --never seen--
+7 --never seen--
+
+
+Node/Lsg
+---------
+
+TBD.
+
+
+Function
+---------
+
+TBD.
+
+
+
+
+Multiframe messages
+====================
+
+Start frame
+------------
+
+A multiframe message is started with 0x8xxx,
+where:
+  0x8 = 0b1000
+    -> two bits (10) indicating start frame
+    -> two bits (00) indicating temporary MF "channel" 0
+  xxx
+    -> Payload length in bytes, up to 2^12 = 4095
+
+The remaining 6 bytes are two bytes for the regular BAP header,
+and 0-4 bytes for the first payload chunk.
+
+
+Continuation frame
+-------------------
+Continuation frames are started with 0xCy,
+where:
+  0xC = 0b1100
+    -> two bits (11) indicating start frame
+    -> two bits (00) indicating temporary MF "channel" 0
+  y
+    -> continuation counter starting at 0
+
+The remaining 1-7 bytes are the next chunk of the payload.
+
+The counter y is incremented with every continuation frame,
+and overflows back from F to 0.
+
+
+
+
+Heartbeat
+==========
+
+Every second, one of the current functions/registers is
+re-sent. A BAP device has a list of those functions to be
+resent as part of the heartbeat, and will cycle through it.
+
+Heartbeat messages are sent using Opcode 3.
+
+When a large multiframe message is in progress of being sent,
+sending a heartbeat frame will take precedence over sending
+the next part of the MF message.
+
+
+
+
+
+CAN IDs vs. BAP Nodes in Golf mk6:
+===================================
+
+62c	48	?
+63b	41	? Phone -> ?
+63c	47	MDI -> Radio
+62c	48	?
+66c	49	Radio -> MFD
+66f	43	Phone -> MFD
+67c	43	MFD -> Phone
+6c6	47	Radio -> MDI
+6d2	40	?
+6db	 1	?

@@ -1,0 +1,374 @@
+MDI
+
+Wake-up:
+439#1A01030800000000
+
+
+
+
+BAP
+=======
+
+MDI's heartbeat functions:
+2, 3, 4, 14, 15, 16, 17, 20, 21, 22, 23, 24, 27, 28, 29, 37, 38, 39
+
+
+
+63c: MDI -> Radio
+6c6: Radio -> MDI
+
+RReg = Opcode 1 seen from Radio
+RReq = Opcode 2 seen from Radio
+
+
+Node / LsgId: 47
+Functions:
+
+
+ 2 Login? static, sent as first message, with OpCode 0
+RReg
+   03002f00 0304
+
+
+ 3 Initialized? static
+RReg
+   3803cfff 77008000
+
+
+ 4 ? static
+RReg
+   0a
+
+
+14 ? static
+RReg
+   01
+
+
+15 MDI status
+NReg
+   00 <-- MEDIA-IN: DEVICE NOT CONNECTED
+   01 <-- MEDIA-IN: INITIALIZING
+   02 <-- MEDIA-IN: DEVICE NOT FUNCTIONAL
+   03 <-- MEDIA-IN: DEVICE NOT SUPPORTED
+   04 <-- MEDIA-IN: NO AUDIO FILES
+   05 <-- (ready, enable display, also in AUX mode)
+   10 <-- SW-UPDATE...
+   11 <-- SW-UPDATE...
+   12 <-- SW-UPDATE COMPLETED
+   13 <-- SW-UPDATE FAILED
+
+
+16 ?
+RReg
+   00000100 60000000
+   1ec00300 60000000 <-- nothing connected, only radio NM faked (on boot?)
+   1ec02300 60000000 <-- nothing connected (AUX in)
+   1ec0f3ff ee000000 <-- USB device connected
+
+
+17 Source (USB ID), length-prefixed ASCII, unknown trailing byte (@ on USB?)
+NReg
+   0000 <-- nothing connected, only radio NM faked (on boot?)
+   05417578 496e20 <-- '.AuxIn '
+   0a555342 20526561 64657240 <-- '.USB Reader@'
+   12554e53 5550504f 52544544 20444556 49434500 <-- '.UNSUPPORTED DEVICE.'
+
+
+20 Playback status/control
+RReg
+RReq
+   00 <-- Uninitialized
+   01 <-- Playing
+   03 <-- Paused
+   04 <-- Seeking forwards
+   05 <-- Seeking backwards
+   41 <-- Invalid request
+   ff <-- AUX in
+  Requests from radio (opcode 2):
+    01 <-- Play
+    02 <-- Pause, then CRASH THE MDI on resume (01)
+    03 <-- Pause (called on volume 0 and radio shutdown)
+    04 <-- Seek forward
+    05 <-- Seek backward
+
+
+21 ?
+RReg
+RReq
+   01 <- No media seen since boot
+   00 <- Some media seen since boot
+  Requests (opcode 2):
+    00
+
+
+22 ?
+RReg
+   00 <-- when USB device connected / playing
+   03 <-- just before playing a file (step 2)
+   04 <-- just before playing a file (step 1)
+   ff <-- when nothing connected (AUX in)
+
+
+23 Track time, seconds, Intel byte order, 2x16bit
+RReg
+   ffffffff <-- when nothing connected (AUX in)
+   d5007a00 <-- 3:33 track length, 2:02 current position
+
+
+24 Files in current folder, current file number
+RReg
+   00000000 <-- on boot
+   ffffffff <-- when nothing connected (AUX in)
+   04000300 <-- 4 files, playing #3 (counting from 1)
+
+
+25 Next buttons
+  Always response '00' (opcode 4) to radio request.
+
+  Requests from radio (opcode 2):
+    0001 <-- Next track button pressed 1x
+    0103 <-- Next folder button pressed 3x
+  all followed by 000000 on function 35
+
+
+26 Prev buttons
+  Always response '00' (opcode 4) to radio request.
+
+  Requests from radio (opcode 2):
+    0002 <-- Prev button pressed 2x
+    0101 <-- Prev folder button pressed 1x
+  all followed by 000000 on function 35
+
+
+27 Mix status
+RReg
+   00 <-- Mix none
+   01 <-- Mix All
+   02 <-- Mix Folder
+   ff <-- when nothing connected (AUX in)
+  Requests from radio (opcode 2):
+    02 <-- Mix Folder
+    01 <-- Mix All
+    00 <-- Mix none
+  NOT followed by 000000 on function 35
+
+
+28 Scan status
+RReg
+   00 <-- Scan none
+   01 <-- Scan All
+   02 <-- Scan Folder
+   ff <-- when nothing connected (AUX in)
+  Requests from radio (opcode 2):
+    02 <-- Scan Folder
+    01 <-- Scan All
+    00 <-- Scan none
+  all followed by 000000 on function 35
+
+
+29 Repeat status
+RReg
+   01 <-- Repeat none
+   02 <-- Repeat Folder
+   ff <-- when nothing connected (AUX in)
+  Requests from radio (opcode 2):
+    02 <-- Repeat Folder
+    01 <-- Repeat none
+  NOT followed by 000000 on function 35
+
+
+30 File name, length-prefixed ASCII
+NReg
+Not refreshed in AUX mode
+   0a6d7966 696c652e 6d7033
+   '.myfile.mp3'
+   00
+   '.'  (AUX mode)
+
+
+31 Title, Artist, Album, 3x length-prefixed ASCII
+NReg
+Not refreshed in AUX mode
+   05546974 6c650641 72746973 7405416c 62756d
+   '.Title.Artist.Album'
+   000000
+   '...'  (AUX mode)
+
+
+33 ?? Directory browser ??
+RReg (later)
+   200402
+   800000ff ff
+
+   Requests *HAVE_TO_BE* multi-frame BAP!
+
+   Request 5 directory entries (max 6), starting with the 2nd (WITH file types):
+     000205 (opcode 1!)
+     cansend can0 6c6#80031be1000205
+   Response example:
+     00020350 08 <ASCII>
+   Response format:
+     00 start_entry num_entries entry_type name_len <ASCII>
+     where entry_type
+       10 folder
+       50 file
+       51 playing
+       ?? playlist
+
+     43 Too many files requested
+
+
+   Request ?:
+     010000
+   Response:
+     010000
+
+   Request ?:
+     010001
+   Response:
+     41000101 50
+
+   Request ?:
+     010002
+   Response:
+     41000201 500250
+
+   Request ?:
+     010003
+   Response:
+     41000301 50025003 50
+
+   Request 3 file types (max 6), starting with the 5th:
+     010503
+   Response:
+     01050350 5150 (normal file, playing file, normal file)
+     43 (invalid request)
+     011900 (zero files starting at position 19)
+
+
+   Request 5 directory entries (max 6), starting with the 2nd (withOUT file types):
+     020205 (opcode 1!)
+   Response example:
+     02020308 <ASCII>
+   Response format:
+     02 start_entry num_entries name_len <ASCII>
+
+
+   Response 41: Unknown request command
+
+   Commands 00, 01, 02: Special form when start==00
+     response command += 0x40 (i.e. 02 turns into 42)
+     response start 00 (as requested)
+     response count as requested
+     list of entries, BUT every entry prefixed with its index as one byte, i.e.:
+     ENTRY ENTRY turns into: 01 ENTRY 02 ENTRY
+
+
+34 Folder name, length-prefixed ASCII, unknown 3 byte suffix
+NReg
+Not refreshed in AUX mode
+   015c0200 01
+   '.\...'
+   045c4d50 33030000
+   '.\MP3...'
+   00000001
+   '....'  (AUX mode)
+   00ffff00
+   '....'  (AUX mode)
+
+   Suffix bytes:
+     1: previous folder's (or current file's) position in current folder (used for start position when going up)
+     2: 00
+     3: 01 if top folder (hide UP button), otherwise 00
+
+
+35 Change folder
+NReg
+RReq
+   Request (opcode 2):
+     000000 <-- reset folder browser (called when returning to Now Playing screen)
+   Response (opcode 4):
+     00 <-- when USB device connected
+     01 <-- when nothing connected (AUX in)
+
+   Request (opcode 2):
+     000001 <-- go to root/top
+   Response (opcode 4):
+     00 <-- okay
+
+   Request (opcode 2):
+     010002 <-- go up (by 1 folder?)
+   Response (opcode 4):
+     00 <-- okay
+
+   Request (opcode 2):
+     040003 <-- enter 4th folder
+   Response (opcode 4):
+     00 <-- okay
+     02 <-- Folder empty
+
+   Request (opcode 2):
+     040005 <-- play 4th entry (file/folder) in current folder
+   Response:
+     (MDI loads new file and prepares for playing)
+     00 <-- okay
+     (MDI prepares further)
+     00 <-- okay
+     (MDI sends last updates: 4.39, *4.22 == '00'*, 3.33, 4.34)
+
+
+   After any calls to 47/35, the following is also sent back:
+     (opcode 4) a refresh of 39
+     If USB connected, (opcode 3!) on 33: '800000ff ff'
+     (opcode 4) a refresh of 34
+
+
+37 MDI enable, part 1
+NReg
+RReq
+   00 <-- "MDI off" (on MDI boot)
+   01 <-- "MDI on"
+
+   Request '01' to actually boot the MDI (part 1)
+
+
+38 MDI enable, part 2
+NReg
+RReq
+   00 <-- "MDI off" (on MDI boot)
+   07 <-- "MDI on"
+
+   Request '07' to actually boot the MDI (part 2)
+
+
+39 Number of entries in folder, number of folders in folder
+NReg
+   ffffffff <-- on boot / when nothing connected (AUX in)
+   04000000 <-- 4 files, 0 folders
+
+
+
+
+
+
+MDI's heartbeat when 'off' but kept alive by NM:
+
+2	03002f00 0304
+3	3803cfff 77008000
+4	0a
+14	01
+15	05
+16	1ec02300 60000000
+17	05417578 496e20
+20	ff
+21	00
+22	ff
+23	ffffffff
+24	ffffffff
+27	ff
+28	ff
+29	ff
+37	01
+38	07
+39	ffffffff

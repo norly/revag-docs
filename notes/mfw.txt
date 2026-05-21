@@ -1,0 +1,23 @@
+MFW: 5c1
+
+All keys released:
+00 00 00 60
+
+Right side:
+
+up	22 00 00 60
+down	23 00 00 60
+left	09 00 00 60
+right	0a 00 00 60
+ok	28 00 00 60
+return	29 00 00 60
+
+
+Left side:
+
+left	03 00 00 60
+right	02 00 00 60
+volup	06 00 00 60
+voldn	07 00 00 60
+phone	1a 00 00 60
+voice	2a 00 00 60

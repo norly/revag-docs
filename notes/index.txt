@@ -1,0 +1,46 @@
+2c1     Turn signal     (r0.1s, 5sec/RadioOn)
+2c3     Ignition        (r0.1s, 5sec/RadioOn)
+351     Vehicle speed   (r0.1s)
+359             (r0.1s)
+35b     RPM, oil/water temp, pedals     (r0.1s)
+369             (r0.1s)
+3e1     Heating         (r0.1s, 5sec/RadioOn)
+3e3     interior temp?  (r0.8s, 5sec/RadioOn)
+42b     Cluster?        (r0.13s)
+439     Radio on?       (r0.13s)
+43a     Bluetooth?      (r0.13s)
+457             (r0.1s, 5sec/RadioOn)
+470     Door contacts, rev gear (r0.05s, 5sec/RadioOn)
+523             (r0.2s)
+527     Outside temps   (r0.2s)
+531     Lights  (r0.05s, 5sec/RadioOn)
+54b	PDC distances
+557             (r0.5sec)
+571     Battery (r0.5sec, 5sec/RadioOn)
+575     Key pos?        (r0.2sec, 5sec/RadioOn)
+5c1	Multi function wheel
+5e1     AC???   (r0.2sec, 5sec/RadioOn)
+60e             (r1sec)
+621     Cluster info    (r0.1sec)
+62c             (r1sec)
+62f     MFD status      (r0.2sec)
+635     Brightness knob (r0.2sec, 5sec/RadioOn)
+63b             (r1sec)
+63c     MDI -> Radio
+651             (r0.1sec)
+653     Localization    (r0.5sec)
+655     CAN Gateway     (r0.5sec)
+658             (r0.1sec)
+65d     Time, odometer  (r1sec)
+65f	VIN     (r0.2sec/part)
+661     Radio power     (r1sec)
+665             (r1sec)
+66c     BAP Radio -> MFD
+66f     BAP
+67a	OPS on/off?
+67c     BAP Phone -> MFD?
+6c6     Radio -> MDI
+6c9             (r20sec)
+6cb
+6d2     BAP
+6db     BAP

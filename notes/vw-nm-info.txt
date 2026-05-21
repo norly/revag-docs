@@ -1,0 +1,62 @@
+Volkswagen Network Mangement on Infotainment CAN bus (Golf 6)
+==================================================================
+
+
+First device:
+  42B#0B02C0020000
+  435#1502000000840000
+  439#1902030C00000000
+
+Join:
+  42B#0B02C0040000
+  439#1902010400000000
+  43A#1A02010400040000
+  43A#0B01010400000000
+
+Stabilize:
+  42B#150200000000
+
+Run:
+  42B#150100000000
+  439#1501010400000000
+  439#1A01010400000000
+  439#1A01010500000000
+  43A#0B01010500000000
+
+
+Request shutdown:
+  439#1A01010400000000
+  43A#0B01010400040000
+
+
+
+
+435#1502010000040000
+
+439#1A01010100000000
+      ^^^^^^^^^^^^^^
+       | | | | | | \- D8: 00
+       | | | | | \- D7: 00
+       | | | | \- D6: 00, 04, 02, 84
+       | | | \- D5: 00
+       | | \- D4: 01, 04, 05, 08, 0C
+       | \- D3: 01, 03
+       \- Opcode
+
+
+Opcode:
+01 - Ready
+02 - Login
+11 - Request sleep
+31 - Sleep ACKed by everyone, shut down
+04 - Limp Home?
+14 - Sleep Limp Home?
+
+01 - Ring Message
+02 - Alive Message
+04 - Limp Home Message
+10 - Bussleep.ind
+20 - Bussleep.ack
+
+
+D3-D8 are probably the internal NM state printed for debugging.
